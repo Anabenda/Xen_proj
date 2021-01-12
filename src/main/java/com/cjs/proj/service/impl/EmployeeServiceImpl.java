@@ -292,6 +292,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
     }
 
+    @Override
+    public Employee findSelf() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Example example = new Example(Employee.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo("email", email);
+        return employeeMapper.selectOneByExample(example);
+    }
 
 
     /**

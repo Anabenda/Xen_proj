@@ -2,5 +2,9 @@ package com.cjs.proj.service;
 
 public interface XenServerService {
 
-    public void startup(String hostname, String username, String password) throws Exception;
+    public void startup() throws Exception;
+
+    void shutdown() throws Exception;
+
+    String getStatus() throws Exception;
 }

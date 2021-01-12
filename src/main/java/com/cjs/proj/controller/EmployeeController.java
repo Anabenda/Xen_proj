@@ -112,4 +112,8 @@ public class EmployeeController {
         return employeeService.findByDepartmenId(searchMap, page, size);
     }
 
+    @GetMapping("/findSelf")
+    public Employee findSelf() {
+        return employeeService.findSelf();
+    }
 }

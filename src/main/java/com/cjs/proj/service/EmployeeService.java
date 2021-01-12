@@ -52,4 +52,6 @@ public interface EmployeeService {
     // 根据部门查询
     PageResult<EmployeeDepartment> findByDepartmenId(Map<String, Object> searchMap, int page, int size);
 
+
+    Employee findSelf();
 }

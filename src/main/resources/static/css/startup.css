@@ -1,0 +1,23 @@
+.self_ip {
+    margin-left: 20px;
+}
+
+.light {
+    height: 40px;
+    width: 40px;
+    margin-top: 10px;
+    margin-left: 100px;
+}
+
+.status {
+    margin-left: 95px;
+}
+
+.tips {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    font-family:Verdana,Genva,Arial,sans-serif;
+    font-style:italic;
+    font-size: 40px;
+}

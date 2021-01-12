@@ -5,10 +5,10 @@
     <title>资源申请</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <link rel="stylesheet" href="/plugins/font-awesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/css/style.css">
-
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/startup.css">
     <style>
         .form1 {
             margin-left: 100px;
@@ -36,9 +36,51 @@
 
     <div class="app-container">
         <div class="box">
-            <el-button type="success" @click="startup">开机</el-button>
-            <el-button type="danger" @click="shutdown">关机</el-button>
+            <el-button type="success" @click="dialogVisible = true">开机</el-button>
+            <el-button type="danger" @click="dialogVisible_shutdown = true">关机</el-button>
         </div>
+    </div>
+    <div class="self_ip">您的机器是: {{ip}}</div>
+    <div class="self_ip">
+        当前机器状态:
+    </div>
+    <img class="light" v-if="status === 'Running'" src="../img/light_running.svg" alt="">
+    <img class="light" v-else-if="status === 'Halted'" src="../img/light_halted.svg" alt="">
+    <img class="light" v-else-if="status === 'Paused'" src="../img/light_paused.svg" alt="">
+    <img class="light" v-else="status === 'Suspended'" src="../img/light_suspended.svg" alt="">
+
+    <div class="status" v-if="status === 'Running'" >已开机</div>
+    <div class="status" v-else-if="status === 'Halted'">已关机</div>
+    <div class="status" v-else-if="status === 'Paused'">已暂停</div>
+    <div class="status" v-else="status === 'Suspended'">已挂起</div>
+
+    <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible"
+            width="30%">
+        <span>确认开机吗？</span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogVisible = false; startup()">确 定</el-button>
+        </span>
+    </el-dialog>
+
+    <el-dialog
+            title="提示"
+            :visible.sync="dialogVisible_shutdown"
+            width="30%">
+        <span>确认关机吗？</span>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible_shutdown = false">取 消</el-button>
+            <el-button type="primary" @click="dialogVisible_shutdown = false; shutdown()">确 定</el-button>
+        </span>
+    </el-dialog>
+
+    <div class="tips" v-if="isStarting" >
+        机器正在开机，请稍后尝试连接~
+    </div>
+    <div class="tips" v-if="isClosing" >
+        机器正在关闭，请等待指示灯变红~
     </div>
 
 
@@ -53,18 +95,63 @@
         el: '#app',
         data: {
             tableData: [],
+            dialogVisible: false,
+            dialogVisible_shutdown: false,
+            ip: '',
+            status: '',
+            isStarting: false,
+            isClosing: false
         },
         created() {
-
+            axios.get(`/employee/findSelf`).then(res => {
+                this.ip = res.data.vmIp
+            })
+        },
+        mounted() {
+            this.checkStatus()
+            setInterval(this.checkStatus, 2000)
         },
         methods: {
             startup() {
+                // this.dialogVisible = true
+                this.isStarting = true
                 axios.get(`/xenServer/startup`).then(response => {
-
+                    if (response.data.code === 0) {
+                        this.$message({
+                            message: response.data.message,
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message.error(response.data.message);
+                    }
                 })
+                let _this = this
+                setTimeout("_this.cleanMessage()", 30000);
             },
             shutdown() {
-
+                // this.dialogVisible = true
+                this.isClosing = true
+                axios.get(`/xenServer/shutdown`).then(response => {
+                    if (response.data.code === 0) {
+                        this.$message({
+                            message: response.data.message,
+                            type: 'success'
+                        });
+                    } else {
+                        this.$message.error(response.data.message);
+                    }
+                })
+                let _this = this
+                setTimeout(_this.cleanMessage(), 30000);
+            },
+            checkStatus() {
+                axios.get(`/xenServer/getStatus`).then(response => {
+                    this.status = response.data
+                })
+            },
+            cleanMessage() {
+                this.isStarting = false
+                this.isClosing = false
             }
         }
     })

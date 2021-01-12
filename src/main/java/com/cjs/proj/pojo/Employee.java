@@ -32,6 +32,35 @@ public class Employee implements Serializable {
 
     private Integer role;
 
+    private String cpuIp;
+
+    private String vmIp;
+
+    private String uuid;
+
+    public String getCpuIp() {
+        return cpuIp;
+    }
+
+    public void setCpuIp(String cpuIp) {
+        this.cpuIp = cpuIp;
+    }
+
+    public String getVmIp() {
+        return vmIp;
+    }
+
+    public void setVmIp(String vmIp) {
+        this.vmIp = vmIp;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public Integer getId() {
         return id;
