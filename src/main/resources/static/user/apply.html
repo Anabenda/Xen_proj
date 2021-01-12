@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>资源申请</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        .form1 {
+            margin-left: 100px;
+            margin-top: 50px
+        }
+
+        .id1 {
+            border: 1px solid black;
+        }
+    </style>
+
+</head>
+
+
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>申请<small>资源申请</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>申请</el-breadcrumb-item>
+            <el-breadcrumb-item>资源申请</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+
+    <div class="app-container">
+        <div class="box">
+            <h2>一键申请</h2>
+            <el-table
+                    :data="tableData"
+                    border
+                    style="width: 100%" :header-cell-style="{'text-align':'center'}"
+                    :cell-style="{'text-align':'center'}">
+                <el-table-column
+                        fixed
+                        prop="system"
+                        label="系统类型"
+                        width="200">
+                </el-table-column>
+                <el-table-column
+                        prop="isGpu"
+                        label="是否携带GPU"
+                        width="150">
+                </el-table-column>
+                <el-table-column
+                        prop="memory"
+                        label="内存大小"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="vCpu"
+                        label="vCPU个数"
+                        width="180">
+                </el-table-column>
+                <el-table-column
+                        prop="space"
+                        label="存储大小"
+                        width="180">
+                </el-table-column>
+                <el-table-column label="请选择申请时长">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.time_val" placeholder="请选择申请时长">
+                            <el-option v-for="(item, index) in scope.row.time" :label="item" :value="index" :key="index"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="操作"
+                >
+                    <template slot-scope="scope">
+                        <el-button @click="handleClick(scope.row)" type="primary">申请</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+
+            <br />
+            <h2>自定义申请</h2>
+
+            <el-table
+                    :data="register_data"
+                    border
+                    style="width: 100%" :header-cell-style="{'text-align':'center'}"
+                    :cell-style="{'text-align':'center'}"
+                    :span-method="objectSpanMethod">
+                <el-table-column
+                        fixed
+                        prop="name"
+                        label="配置"
+                        width="400">
+                </el-table-column>
+                <el-table-column
+                        label="申请信息"
+                        width="600">
+                    <template slot-scope="scope">
+                        <el-select v-model="scope.row.component" placeholder="请选择">
+                            <el-option v-for="(item, index) in scope.row.value" :label="item" :value="index" :key="index"></el-option>
+                        </el-select>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="备注"
+                        >
+                    <template slot-scope="scope">
+                        <el-input
+                                type="textarea"
+                                :autosize="{ minRows: 8, maxRows: 8}"
+                                placeholder="请输入备注信息"
+                                v-model="scope.row.message">
+                        </el-input>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div style="margin-top: 20px; margin-right: 70px">
+                <el-button type="primary" style="float:right" @click="submit(register_data)">提交申请</el-button>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+</body>
+
+<script src="/js/vue.js"></script>
+<script src="/js/axios.js"></script>
+<script src="/js/elementui.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            tableData: [],
+            register_data: [
+                {name: '请选择租用内存', value: ['4 GiB', '8 GiB', '16 GiB', '32 GiB']},
+                {name: '请选择租用vCPU个数', value: [2, 4, 8]},
+                {name: '请选择租用存储空间大小', value: ['200 GiB', '400 GiB', '800 GiB', '1 TiB']},
+                {name: '请选择租用时长', value: ['4 h', '8 h', '12 h', '24 h']}
+            ]
+        },
+        created() {
+            axios.get(`/template/findAll`).then(response => {
+                this.tableData = response.data;
+                for(data of this.tableData){
+                    data.time = ['4 h', '8 h', '12 h', '24 h']
+                }
+            })
+
+        },
+        methods: {
+            /**
+             * 模板的申请
+             * @param row
+             */
+            handleClick(row) {
+                if(row.time_val == null){
+                    this.$alert('请选择申请时长', '警告', {
+                        confirmButtonText: '确定',
+                    });
+                } else{
+                    this.$confirm('确认申请吗?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.$message({
+                            type: 'success',
+                            message: '已提交申请，请等待审核!'
+                        });
+                        let audit = {
+                            memory: row.memory,
+                            vCpu: row.vCpu,
+                            space: row.space,
+                            applyTime: row.time[row.time_val]
+                        }
+                        // console.log(audit)
+                        axios.post(`/audit/save`, audit).then(response=>{
+
+                        })
+                        axios.get(`/audit/sendEmail`).then(response=>{
+
+                        })
+                    })
+                }
+            },
+
+            objectSpanMethod({ row, column, rowIndex, columnIndex }) {
+                if (columnIndex === 2) {
+                    if (rowIndex % 4 === 0) {
+                        return {
+                            rowspan: 4,
+                            colspan: 1
+                        };
+                    } else {
+                        return {
+                            rowspan: 0,
+                            colspan: 0
+                        };
+                    }
+                }
+            },
+
+            submit(register_data){
+                let flag = true
+                for(data of register_data){
+                    if(data.component == null){
+                        this.$alert('请选择完整信息', '警告', {
+                            confirmButtonText: '确定',
+                        });
+                        flag = false;
+                        break;
+                    }
+                }
+                if(flag){
+                    this.$confirm('确认申请吗?', '提示', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        this.$message({
+                            type: 'success',
+                            message: '已提交申请，请等待审核!'
+                        });
+                        let audit = {
+                            memory: this.register_data[0].value[this.register_data[0].component],
+                            vCpu: this.register_data[1].value[this.register_data[1].component],
+                            space: this.register_data[2].value[this.register_data[2].component],
+                            applyTime: this.register_data[3].value[this.register_data[3].component],
+                            info: this.register_data[0].message
+                        }
+                        // console.log(audit)
+                        axios.post(`/audit/save`, audit).then(response=>{
+
+                        })
+                        axios.get(`/audit/sendEmail`).then(response=>{
+
+                        })
+                    })
+                }
+
+            }
+        }
+    })
+</script>
+</html>

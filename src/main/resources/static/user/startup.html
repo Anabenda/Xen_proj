@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>资源申请</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        .form1 {
+            margin-left: 100px;
+            margin-top: 50px
+        }
+
+        .id1 {
+            border: 1px solid black;
+        }
+    </style>
+
+</head>
+
+
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>申请<small>资源申请</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>申请</el-breadcrumb-item>
+            <el-breadcrumb-item>资源申请</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+
+    <div class="app-container">
+        <div class="box">
+            <el-button type="success" @click="startup">开机</el-button>
+            <el-button type="danger" @click="shutdown">关机</el-button>
+        </div>
+    </div>
+
+
+</div>
+</body>
+
+<script src="/js/vue.js"></script>
+<script src="/js/axios.js"></script>
+<script src="/js/elementui.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            tableData: [],
+        },
+        created() {
+
+        },
+        methods: {
+            startup() {
+                axios.get(`/xenServer/startup`).then(response => {
+
+                })
+            },
+            shutdown() {
+
+            }
+        }
+    })
+</script>
+</html>

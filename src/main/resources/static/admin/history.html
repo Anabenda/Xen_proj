@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSS</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>历史<small>审核历史</small></h1>
+        <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item>历史</el-breadcrumb-item>
+            <el-breadcrumb-item>审核历史</el-breadcrumb-item>
+        </el-breadcrumb>
+    </div>
+    <div class="app-container">
+        <div class="box">
+            <el-table :data="tableData" border style="width: 100%" :header-cell-style="{'text-align':'center'}"
+                      :cell-style="{'text-align':'center'}" v-loading="loading">
+                <el-table-column prop="name" label="员工姓名" width="120"></el-table-column>
+                <el-table-column prop="email" label="邮箱" width="200"></el-table-column>
+                <el-table-column prop="department.departName" label="部门" width="120"></el-table-column>
+                <el-table-column prop="system" label="系统类型" width="160"></el-table-column>
+                <el-table-column prop="isGpu" label="是否携带GPU" width="80"></el-table-column>
+                <el-table-column prop="memory" label="内存大小" width="80"></el-table-column>
+                <el-table-column prop="vCpu" label="v-cpu个数" width="70"></el-table-column>
+                <el-table-column prop="space" label="存储大小" width="80"></el-table-column>
+                <el-table-column prop="applyTime" label="申请时长" width="80"></el-table-column>
+                <el-table-column prop="info" label="备注"></el-table-column>
+                <el-table-column prop="time" label="申请时间" width="100"></el-table-column>
+                <el-table-column prop="state" label="审核状态" width="80"></el-table-column>
+                </el-table-column>
+
+            </el-table>
+            <div class="pagination-container">
+                <el-pagination
+                        class="pagiantion"
+                        @size-change="searchData($orderBy_flag, 1)"
+                        @current-change="searchData($orderBy_flag, 1)"
+                        :current-page.sync="currentPage"
+                        :page-sizes="[10, 20, 30, 40]"
+                        :page-size.sync="size"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="total">
+                </el-pagination>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+</body>
+
+<script src="/js/vue.js"></script>
+<script src="/js/axios.js"></script>
+<script src="/js/elementui.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            tableData: [],
+            page: 1,
+            size: 10
+        },
+        created() {
+            this.getData();
+        },
+        methods: {
+            getData() {
+                axios.get(`/audit/findPageByDepartmenIdExclude?page=${this.page}&size=${this.size}`).then(response=>{
+                    this.tableData = response.data.rows
+                })
+            }
+        }
+    })
+</script>
+</html>

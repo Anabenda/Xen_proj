@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <title>CCS</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="css/theme-chalk.css">
+    <link rel="stylesheet" href="css/login_style.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+
+<body class="mainBg">
+<div id="app">
+    <form class="loginForm clear" action="/authentication/form" method="POST">
+        <div class="loginMain">
+            <!--          <div class="loginlogo"></div>-->
+            <br/><br/><br/><br/><br/><br/><br/><br/><br/>
+            <div class="loginCon" id="wohaoea">
+            
+                <span class="el-form-item">
+                    <span class="userIcon"></span>
+                    <span class="el-input">
+                        <input class="el-input__inner" name="username" placeholder="登陆账号"/>
+                    </span>
+                </span>
+
+                <span class="el-form-item">
+                    <span class="pwdIcon"></span>
+                    <span class="el-input">
+                        <input class="el-input__inner" name="password" type="password" placeholder="密码"/>
+                    </span>
+                </span>
+                <div id="forget">
+                    <template>
+                        <el-button type="text" class="butT" @click="formVisible=true;pojo={}" id="forget_b">忘记密码</el-button>
+                    </template>
+                </div>
+            </div>
+
+            <div class="loginBtn">
+                <input type="submit" class="el-button el-button--primary" value="登录">
+            </div>
+        </div>
+    </form>
+
+    <div class="add-form">
+        <!--弹出窗口-->
+        <el-dialog title="重设密码" :visible.sync="formVisible">
+            <el-form label-width="130px" :model="pojo" :rules="rules" ref="pojo">
+                <el-form-item label="请输入邮箱号" prop="email">
+                    <el-input placeholder="请输入邮箱号" v-model="pojo.email" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="请输入新密码" prop="password">
+                    <el-input placeholder="请输入新密码" v-model="pojo.password" type="password" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="请确认新密码" prop="password_confirm">
+                    <el-input placeholder="请确认新密码" v-model="pojo.password_confirm" type="password" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="获取邮件验证码" prop="message">
+                    <el-input placeholder="请输入验证码" v-model="pojo.message"></el-input>
+                    <el-button :loading="loading" :disabled="button_disabled" type="primary" class="butT"
+                               @click="sendSms(pojo.email)">{{ttt}}
+                    </el-button>
+                </el-form-item>
+                <el-form-item>
+                    <el-button @click="save(pojo)">确认</el-button>
+                    <el-button @click="formVisible = false">关闭</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+    </div>
+
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="js/vue.js"></script>
+<script src="js/elementui.js"></script>
+<script src="js/axios.js"></script>
+<script>
+    window.onload = windowHeight; //页面载入完毕执行函数
+    function windowHeight() {
+        var asieHeight = document.getElementById("app")
+        asieHeight.style.height = document.documentElement.clientHeight + 'px'
+    }
+</script>
+
+<script>
+    new Vue({
+        el: "#app",
+        data() {
+            var validatePass = (rule, value, callback) => {
+                if (value === '') {
+                    callback(new Error('请再次输入密码'));
+                } else if (value !== this.pojo.password) {
+                    callback(new Error('两次输入密码不一致!'));
+                } else {
+                    callback();
+                }
+            };
+            return {
+                button_disabled: false,
+                loading: false,
+                ttt: "获取验证码",
+                pojo: {
+                    email: "",
+                    password: "",
+                    password_confirm: "",
+                    message: "",
+                },
+                formVisible: false,
+
+                rules: {
+                    email: [
+                        {required: true, message: '请输入邮箱地址', trigger: 'blur'},
+                        {type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change']}
+                    ],
+                    password: [
+                        {required: true, message: '请输入新密码', trigger: 'blur'},
+                        {pattern: /^[A-Za-z0-9]{7,20}$/, message: '请输入正确的密码格式(7位以上字母或数字)'}
+                    ],
+                    password_confirm: [
+                        { validator: validatePass, trigger: 'blur' }
+                    ],
+                    message: [
+                        {required: true, message: '请输入验证码', trigger: 'blur'},
+                    ]
+                },
+
+            }
+        },
+        methods: {
+            sendSms(email) {
+                this.button_disabled = true;
+                this.loading = true;
+                this.ttt = "加载中";
+                axios.get(`/email/sendSms?email=${email}`).then(response => {
+                    alert(response.data.message);
+                    this.button_disabled = false;
+                    this.loading = false;
+                    this.ttt = "获取验证码";
+                })
+            },
+
+            save(pojo) {
+                axios.post(`/email/valid`, this.pojo).then(response => {
+                    alert(response.data.message);
+                    if(response.data.code == 0){
+                        this.formVisible = false;
+                    }
+                })
+            }
+        },
+    })
+</script>
+</html>

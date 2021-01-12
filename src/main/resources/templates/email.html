@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Email</title>
+</head>
+<body>
+<!--<img src='cid:boot'>-->
+<h1><span th:text="${title}" style="color:dodgerblue">Craig Walls</span></h1>
+<div th:text="${content_1}">请使用此代码为账户 10*****@qq.com 重置密码。</div>
+<i>
+    <span th:text="${content_2}">Hello Boot!</span>
+    <span th:text="${content_code}" style="font-weight: 600">Hello Boot!</span>
+</i>
+
+<div th:text="${content_hhh}">请使用此代码为账户 10*****@qq.com 重置密码。</div>
+
+<br /> <br />
+<div th:text="${content_3}">请使用此代码为账户 10*****@qq.com 重置密码。</div>
+<div th:text="${content_4}">请使用此代码为账户 10*****@qq.com 重置密码。</div>
+</body>
+</html>
