@@ -47,12 +47,13 @@
     <img class="light" v-if="status === 'Running'" src="../img/light_running.svg" alt="">
     <img class="light" v-else-if="status === 'Halted'" src="../img/light_halted.svg" alt="">
     <img class="light" v-else-if="status === 'Paused'" src="../img/light_paused.svg" alt="">
-    <img class="light" v-else="status === 'Suspended'" src="../img/light_suspended.svg" alt="">
+    <img class="light" v-else-if="status === 'Suspended'" src="../img/light_suspended.svg" alt="">
 
     <div class="status" v-if="status === 'Running'" >已开机</div>
     <div class="status" v-else-if="status === 'Halted'">已关机</div>
     <div class="status" v-else-if="status === 'Paused'">已暂停</div>
-    <div class="status" v-else="status === 'Suspended'">已挂起</div>
+    <div class="status" v-else-if="status === 'Suspended'">已挂起</div>
+    <div class="status" v-else>您当前并未分配机器或您的机器处于异常状态，请联系管理员解决</div>
 
     <el-dialog
             title="提示"

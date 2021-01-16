@@ -4,6 +4,7 @@ import com.cjs.proj.entity.Result;
 import com.cjs.proj.pojo.Employee;
 import com.cjs.proj.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.codec.json.KotlinSerializationJsonEncoder;
@@ -24,6 +25,12 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class EmailController {
 
+    @Value("${self.sendingEmail}")
+    private String sendingEmail;
+
+    @Value("${self.emailSuffix}")
+    private String emailSuffix;
+
     @Autowired
     private JavaMailSender javaMailSender;
 
@@ -33,15 +40,15 @@ public class EmailController {
     @Autowired
     private RedisTemplate<Object, Object> redisTemplate;
 
-    public void sendSimpleEmail(String email) {
-        // 构造Email消息
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("375458221@qq.com");
-        message.setTo(email);
-        message.setSubject("邮件主题");
-        message.setText("琳琳大可爱真是可爱到feiqi呢😏");
-        javaMailSender.send(message);
-    }
+//    public void sendSimpleEmail(String email) {
+//        // 构造Email消息
+//        SimpleMailMessage message = new SimpleMailMessage();
+//        message.setFrom("375458221@qq.com");
+//        message.setTo(email);
+//        message.setSubject("邮件主题");
+//        message.setText("琳琳大可爱真是可爱到feiqi呢😏");
+//        javaMailSender.send(message);
+//    }
 
     @Autowired
     private SpringTemplateEngine templateEngine;
@@ -54,13 +61,21 @@ public class EmailController {
         }
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-        mimeMessageHelper.setFrom("375458221@qq.com");
+        mimeMessageHelper.setFrom(sendingEmail);
         mimeMessageHelper.setTo(email);
         mimeMessageHelper.setSubject("CCS验证码邮件");
         // 利用 Thymeleaf 模板构建 html 文本
         Context ctx = new Context();
         ctx.setVariable("title", "密码重置");
         String[] split = email.split("@");
+
+        // 判断该email有没有带后缀，如果没有，给它添上
+        if(split.length == 1) {
+            // 没有
+            email = email + emailSuffix;
+            split = email.split("@");
+        }
+
         String content_1 = "请使用此代码为帐户"+split[0].substring(0, 3)+"xxxxx@"+split[1]+"重置密码。"; //10*****@qq.com 重置密码。"
         ctx.setVariable("content_1", content_1);
 

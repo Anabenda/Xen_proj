@@ -40,7 +40,7 @@ public class XenServerController {
         try {
             return xenServerService.getStatus();
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
             return null;
         }
     }

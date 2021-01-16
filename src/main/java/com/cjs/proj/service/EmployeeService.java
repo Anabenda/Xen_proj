@@ -54,4 +54,8 @@ public interface EmployeeService {
 
 
     Employee findSelf();
+
+    void adAdd(Map map);
+
+    void adChange(Map map);
 }

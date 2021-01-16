@@ -40,14 +40,18 @@
             </div>
 
             <el-table :data="tableData" border style="width: 100%" :header-cell-style="{'text-align':'center'}"
-                      :cell-style="{'text-align':'center'}" v-loading="loading">
+                      :cell-style="{'text-align':'center'}">
                 <el-table-column prop="email" label="员工邮箱" width="180"></el-table-column>
-                <el-table-column prop="name" label="员工姓名" width="180"></el-table-column>
-                <el-table-column prop="ipKey" label="座机分号" width="150"></el-table-column>
-                <el-table-column prop="phone" label="手机号码" width="200"></el-table-column>
+                <el-table-column prop="name" label="员工姓名" width="100"></el-table-column>
+                <el-table-column prop="ipKey" label="座机分号" width="100"></el-table-column>
+                <el-table-column prop="phone" label="手机号码" width="150"></el-table-column>
                 <el-table-column prop="department.departName" :render-header="renderHeader">
                 </el-table-column>
-                <el-table-column prop="floor" label="所在楼层" width="180"></el-table-column>
+                <el-table-column prop="floor" label="所在楼层" width="70"></el-table-column>
+                <el-table-column prop="role" label="权限等级" width="50"></el-table-column>
+                <el-table-column prop="cpuIp" label="cpu服务器地址" width="150"></el-table-column>
+                <el-table-column prop="vmIp" label="虚拟机地址" width="150"></el-table-column>
+                <el-table-column prop="uuid" label="机器编号" width="180"></el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-button @click="edit(scope.row.id)" size="mini" type="text">编辑</el-button>
@@ -72,7 +76,7 @@
             <div class="add-form">
                 <!--弹出窗口-->
                 <el-dialog title="编辑" :visible.sync="formVisible">
-                    <el-form label-width="80px" :rules="rules" :model="pojo" ref="pojo">
+                    <el-form label-width="110px" :rules="rules" :model="pojo" ref="pojo">
                         <el-form-item label="员工邮箱" prop="email">
                             <el-input placeholder="请输入员工邮箱" v-model="pojo.email"></el-input>
                         </el-form-item>
@@ -107,6 +111,18 @@
 
                         <el-form-item label="所在楼层">
                             <el-input placeholder="请输入所在楼层" v-model="pojo.floor"></el-input>
+                        </el-form-item>
+                        <el-form-item label="权限等级">
+                            <el-input placeholder="请输入权限等级" v-model="pojo.role"></el-input>
+                        </el-form-item>
+                        <el-form-item label="cpu服务器地址">
+                            <el-input placeholder="请输入员工对应cpu服务器地址" v-model="pojo.cpuIp"></el-input>
+                        </el-form-item>
+                        <el-form-item label="虚拟机地址">
+                            <el-input placeholder="请输入员工对应虚拟机地址" v-model="pojo.vmIp"></el-input>
+                        </el-form-item>
+                        <el-form-item label="机器编号">
+                            <el-input placeholder="请输入员工对应虚拟机编号" v-model="pojo.uuid"></el-input>
                         </el-form-item>
                         <el-form-item>
                             <el-button @click="save()">保存</el-button>
@@ -167,14 +183,14 @@
                     _this = this
                 }
                 flag = this.orderBy_flag
-                _this.loading = true;
+                // _this.loading = true;
 
                 axios.post(`/employee/findByDepartmenId?page=${_this.currentPage}&size=${_this.size}`, _this.searchMap).then(response => {
                     _this.tableData = response.data.rows;
                     _this.total = response.data.total;
                 })
 
-                _this.loading = false;
+                // _this.loading = false;
                 // this.searchMap = {};
             },
 
@@ -182,6 +198,13 @@
                 // alert(this.pojo.departmentId);
                 axios.post(`/employee/${this.pojo.id == null ? 'add' : 'update'}`, this.pojo).then(response => {
                     alert(response.data.message);
+                    this.searchData(this.orderBy_flag, 1); //刷新列表
+                    this.formVisible = false;//关闭窗口
+                });
+
+                // 加到AD中
+                axios.post(`/employee/${this.pojo.id == null ? 'adAdd' : 'adChange'}`, this.pojo).then(response => {
+                    // alert(response.data.message);
                     this.searchData(this.orderBy_flag, 1); //刷新列表
                     this.formVisible = false;//关闭窗口
                 });

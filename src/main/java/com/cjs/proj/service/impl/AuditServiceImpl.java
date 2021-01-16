@@ -12,6 +12,7 @@ import com.cjs.proj.service.EmployeeService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,6 +34,13 @@ import java.util.concurrent.TimeUnit;
 @Service
 @Transactional
 public class AuditServiceImpl implements AuditService {
+
+    @Value("${self.sendingEmail}")
+    private String sendingEmail;
+
+    @Value("${self.emailSuffix}")
+    private String emailSuffix;
+
     @Autowired
     private AuditMapper auditMapper;
 
@@ -174,7 +182,7 @@ public class AuditServiceImpl implements AuditService {
         }
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-        mimeMessageHelper.setFrom("375458221@qq.com");
+        mimeMessageHelper.setFrom(sendingEmail);
         mimeMessageHelper.setTo(email);
         mimeMessageHelper.setSubject("员工申请审核通知");
         // 利用 Thymeleaf 模板构建 html 文本

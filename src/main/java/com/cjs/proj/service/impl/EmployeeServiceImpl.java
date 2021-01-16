@@ -151,6 +151,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         if(employeeMap.containsKey("floor")){
             employee.setFloor((String) employeeMap.get("floor"));
         }
+        if(employeeMap.containsKey("role")){
+            employee.setRole(Integer.parseInt((String)employeeMap.get("role")));
+        }
+        if(employeeMap.containsKey("cpuIp")){
+            employee.setCpuIp((String) employeeMap.get("cpuIp"));
+        }
+        if(employeeMap.containsKey("vmIp")){
+            employee.setVmIp((String) employeeMap.get("vmIp"));
+        }
+        if(employeeMap.containsKey("uuid")){
+            employee.setUuid((String) employeeMap.get("uuid"));
+        }
         employee.setPassword("123456");
         employeeMapper.insert(employee);
     }
@@ -184,7 +196,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         if(employeeMap.containsKey("floor")){
             employee.setFloor((String) employeeMap.get("floor"));
         }
-        employee.setPassword("123456");
+        if(employeeMap.containsKey("role")){
+            employee.setRole(Integer.parseInt((String)employeeMap.get("role")));
+        }
+        if(employeeMap.containsKey("cpuIp")){
+            employee.setCpuIp((String) employeeMap.get("cpuIp"));
+        }
+        if(employeeMap.containsKey("vmIp")){
+            employee.setVmIp((String) employeeMap.get("vmIp"));
+        }
+        if(employeeMap.containsKey("uuid")){
+            employee.setUuid((String) employeeMap.get("uuid"));
+        }
         employeeMapper.updateByPrimaryKeySelective(employee);
     }
 
@@ -299,6 +322,21 @@ public class EmployeeServiceImpl implements EmployeeService {
         Example.Criteria criteria = example.createCriteria();
         criteria.andEqualTo("email", email);
         return employeeMapper.selectOneByExample(example);
+    }
+
+
+    /**
+     * 将用户新增到域控中
+     * @param map
+     */
+    @Override
+    public void adAdd(Map map) {
+        System.out.println(map);
+    }
+
+    @Override
+    public void adChange(Map map) {
+        System.out.println(map);
     }
 
 

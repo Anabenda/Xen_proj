@@ -14,15 +14,11 @@ public interface EmployeeMapper extends Mapper<Employee> {
     // 查询所有
     @Select("SELECT * FROM employee")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findAllChanged();
 
@@ -30,15 +26,11 @@ public interface EmployeeMapper extends Mapper<Employee> {
     // 根据id查找单个 组合对象
     @Select("SELECT * FROM employee where id=#{id}")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     EmployeeDepartment findByPrimaryKeyChanged(Integer id);
 
@@ -53,30 +45,22 @@ public interface EmployeeMapper extends Mapper<Employee> {
             "</foreach>" +
             "</script> ")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findAllChangedByCondition1(@Param("name") String name,@Param("ids") List<Integer> ids);
 
     // 有名字没部门
     @Select("SELECT * FROM employee WHERE name like CONCAT(CONCAT('%', #{name}), '%')")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findAllChangedByCondition2(String name);
 
@@ -88,30 +72,22 @@ public interface EmployeeMapper extends Mapper<Employee> {
             "</foreach>" + "order by department_id" +
             "</script> ")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findAllChangedByCondition3(@Param("name") String name,@Param("ids") List<Integer> ids);
 
     // 有名字没部门 同时按 部门排序
     @Select("SELECT * FROM employee WHERE name like CONCAT(CONCAT('%', #{name}), '%') order by department_id")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findAllChangedByCondition4(String name);
 
@@ -126,29 +102,21 @@ public interface EmployeeMapper extends Mapper<Employee> {
             "</foreach>" +
             "</script> ")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findByDepartmentId_1(String name, List<Integer> ids, Integer departmentId);
 
     @Select("SELECT * FROM employee where department_id = #{departmentId} and name like CONCAT(CONCAT('%', #{name}), '%')")
     @Results({
-            @Result(property = "id", column = "id"),
-            @Result(property = "email", column = "email"),
-            @Result(property = "name", column = "name"),
             @Result(property = "ipKey", column = "ip_key"),
-            @Result(property = "phone", column = "phone"),
+            @Result(property = "cpuIp", column = "cpu_ip"),
+            @Result(property = "vmIp", column = "vm_ip"),
             @Result(property = "department", column = "department_id", one = @One(select =
                     "com.cjs.proj.mapper.DepartmentMapper.getCompanyById")),
-            @Result(property = "floor", column = "floor"),
-            @Result(property = "role", column = "role")
     })
     List<EmployeeDepartment> findByDepartmentId_2(String name, Integer departmentId);
 }

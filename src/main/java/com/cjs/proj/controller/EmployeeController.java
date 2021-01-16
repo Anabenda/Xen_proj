@@ -116,4 +116,14 @@ public class EmployeeController {
     public Employee findSelf() {
         return employeeService.findSelf();
     }
+
+    @PostMapping("/adAdd")
+    public void adAdd(@RequestBody Map map) {
+        employeeService.adAdd(map);
+    }
+
+    @PostMapping("/adChange")
+    public void adChange(@RequestBody Map map) {
+        employeeService.adChange(map);
+    }
 }
