@@ -25,7 +25,7 @@ public interface AuditService {
     public void cancel(Integer id);
 
     // 根据id同意
-    public void agree(Integer id);
+    public void agree(Integer id) throws RuntimeException;
 
     // 根据id拒绝
     public void refuse(Integer id);

@@ -24,7 +24,7 @@
     <div class="app-container">
         <div class="box">
             <el-table :data="tableData" border style="width: 100%" :header-cell-style="{'text-align':'center'}"
-                      :cell-style="{'text-align':'center'}" v-loading="loading">
+                      :cell-style="{'text-align':'center'}">
                 <el-table-column prop="name" label="员工姓名" width="120"></el-table-column>
                 <el-table-column prop="email" label="邮箱" width="140"></el-table-column>
                 <el-table-column prop="department.departName" label="部门" width="120"></el-table-column>
@@ -72,6 +72,8 @@
     new Vue({
         el: '#app',
         data: {
+            currentPage: 1,
+            total: 10,
             tableData: [],
             page: 1,
             size: 10
@@ -91,7 +93,16 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
+                    // 后台应该先判断是否有符合条件的机器，再执行
                     axios.get(`/audit/agree?id=${row.id}`).then(response => {
+                        if(response.data.code === 0) {
+                            this.$message({
+                                message: response.data.message,
+                                type: 'success'
+                            });
+                        } else {
+                            this.$message.error(response.data.message);
+                        }
                         this.getData()
                     })
                 })

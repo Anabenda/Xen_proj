@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>资源申请</title>
@@ -36,6 +36,22 @@
 
     <div class="app-container">
         <div class="box">
+
+            <div>
+                <span>
+                    <i>您当前的gpu机器是：</i> &nbsp;&nbsp;
+                    <i style="border-bottom: 1px black solid; color: red" v-if="pojo.gpustatus === '使用中'">{{pojo.gpuvmip}}</i>
+                </span>
+                <span style="margin-left: 350px">
+                    <i>您当前的申请状态是：</i>
+                    <i style="border-bottom: 1px black solid; color: red" v-if="pojo.gpustatus">{{pojo.gpustatus}}</i>
+                </span>
+                <span style="margin-left: 350px" :callback="callback">
+                    <i>剩余时间：</i>&nbsp;&nbsp;
+                    <i style="color: red">{{content}}</i>
+                </span>
+            </div>
+
             <h2>一键申请</h2>
             <el-table
                     :data="tableData"
@@ -144,7 +160,10 @@
                 {name: '请选择租用vCPU个数', value: [2, 4, 8]},
                 {name: '请选择租用存储空间大小', value: ['200 GiB', '400 GiB', '800 GiB', '1 TiB']},
                 {name: '请选择租用时长', value: ['4 h', '8 h', '12 h', '24 h']}
-            ]
+            ],
+            pojo: {},
+            endTime: '14907616201',
+            content: '',
         },
         created() {
             axios.get(`/template/findAll`).then(response => {
@@ -154,8 +173,56 @@
                 }
             })
 
+            this.getSelfData()
+
+        },
+        mounted () {
+            this.countdowm(this.endTime)
         },
         methods: {
+            // 倒计时
+            countdowm(timestamp){
+                let self = this;
+                let timer = setInterval(function(){
+                    let nowTime = new Date();
+                    let endTime = new Date(timestamp * 1000);
+                    let t = endTime.getTime() - nowTime.getTime();
+                    if(t>0){
+                        let day = Math.floor(t/86400000);
+                        let hour=Math.floor((t/3600000)%24);
+                        let min=Math.floor((t/60000)%60);
+                        let sec=Math.floor((t/1000)%60);
+                        hour = hour < 10 ? "0" + hour : hour;
+                        min = min < 10 ? "0" + min : min;
+                        sec = sec < 10 ? "0" + sec : sec;
+                        let format = '';
+                        if(day > 0){
+                            format =  `${day}天${hour}小时${min}分${sec}秒`;
+                        }
+                        if(day <= 0 && hour > 0 ){
+                            format = `${hour}小时${min}分${sec}秒`;
+                        }
+                        if(day <= 0 && hour <= 0){
+                            format =`${min}分${sec}秒`;
+                        }
+                        self.content = format;
+                    }else{
+                        clearInterval(timer);
+                        self.content = self.endText;
+                        self._callback();
+                    }
+                },100);
+            }, _callback(){
+                if(this.callback && this.callback instanceof Function){
+                    this.callback(...this);
+                }
+            },
+
+            getSelfData() {
+                axios.get(`/employee/findSelf`).then(res => {
+                    this.pojo = res.data;
+                })
+            },
             /**
              * 模板的申请
              * @param row
@@ -166,29 +233,39 @@
                         confirmButtonText: '确定',
                     });
                 } else{
-                    this.$confirm('确认申请吗?', '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        this.$message({
-                            type: 'success',
-                            message: '已提交申请，请等待审核!'
+                    // 判断是否已经申请了或者正在使用
+                    if(this.pojo.gpustatus !== "未申请") {
+                        this.$alert('请勿重复申请', '警告', {
+                            confirmButtonText: '确定',
                         });
-                        let audit = {
-                            memory: row.memory,
-                            vCpu: row.vCpu,
-                            space: row.space,
-                            applyTime: row.time[row.time_val]
-                        }
-                        // console.log(audit)
-                        axios.post(`/audit/save`, audit).then(response=>{
 
+                    }
+                    else {
+                        this.$confirm('确认申请吗?', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            this.$message({
+                                type: 'success',
+                                message: '已提交申请，请等待审核!'
+                            });
+                            let audit = {
+                                memory: row.memory,
+                                vCpu: row.vCpu,
+                                space: row.space,
+                                applyTime: row.time[row.time_val]
+                            }
+                            // console.log(audit)
+                            axios.post(`/audit/save`, audit).then(response=>{
+                                // 更新数据
+                                this.getSelfData()
+                            })
+                            // axios.get(`/audit/sendEmail`).then(response=>{
+                            //
+                            // })
                         })
-                        axios.get(`/audit/sendEmail`).then(response=>{
-
-                        })
-                    })
+                    }
                 }
             },
 
@@ -220,30 +297,40 @@
                     }
                 }
                 if(flag){
-                    this.$confirm('确认申请吗?', '提示', {
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        type: 'warning'
-                    }).then(() => {
-                        this.$message({
-                            type: 'success',
-                            message: '已提交申请，请等待审核!'
+                    // 判断是否已经申请了或者正在使用
+                    if(this.pojo.gpustatus !== "未申请") {
+                        this.$alert('请勿重复申请', '警告', {
+                            confirmButtonText: '确定',
                         });
-                        let audit = {
-                            memory: this.register_data[0].value[this.register_data[0].component],
-                            vCpu: this.register_data[1].value[this.register_data[1].component],
-                            space: this.register_data[2].value[this.register_data[2].component],
-                            applyTime: this.register_data[3].value[this.register_data[3].component],
-                            info: this.register_data[0].message
-                        }
-                        // console.log(audit)
-                        axios.post(`/audit/save`, audit).then(response=>{
 
+                    } else {
+                        this.$confirm('确认申请吗?', '提示', {
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            this.$message({
+                                type: 'success',
+                                message: '已提交申请，请等待审核!'
+                            });
+                            let audit = {
+                                memory: this.register_data[0].value[this.register_data[0].component],
+                                vCpu: this.register_data[1].value[this.register_data[1].component],
+                                space: this.register_data[2].value[this.register_data[2].component],
+                                applyTime: this.register_data[3].value[this.register_data[3].component],
+                                info: this.register_data[0].message
+                            }
+                            // console.log(audit)
+                            axios.post(`/audit/save`, audit).then(response=>{
+                                // 更新数据
+                                this.getSelfData()
+                            })
+                            // axios.get(`/audit/sendEmail`).then(response=>{
+                            //
+                            // })
                         })
-                        axios.get(`/audit/sendEmail`).then(response=>{
+                    }
 
-                        })
-                    })
                 }
 
             }

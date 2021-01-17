@@ -38,6 +38,12 @@ public class Employee implements Serializable {
 
     private String uuid;
 
+    private String gpustatus;
+
+    private String gpuip;
+
+    private String gpuvmip;
+
     public String getCpuIp() {
         return cpuIp;
     }
@@ -134,6 +140,31 @@ public class Employee implements Serializable {
         this.role = role;
     }
 
+
+    public String getGpustatus() {
+        return gpustatus;
+    }
+
+    public void setGpustatus(String gpustatus) {
+        this.gpustatus = gpustatus;
+    }
+
+    public String getGpuip() {
+        return gpuip;
+    }
+
+    public void setGpuip(String gpuip) {
+        this.gpuip = gpuip;
+    }
+
+    public String getGpuvmip() {
+        return gpuvmip;
+    }
+
+    public void setGpuvmip(String gpuvmip) {
+        this.gpuvmip = gpuvmip;
+    }
+
     @Override
     public String toString() {
         return "Employee{" +
@@ -146,6 +177,12 @@ public class Employee implements Serializable {
                 ", departmentId=" + departmentId +
                 ", floor='" + floor + '\'' +
                 ", role=" + role +
+                ", cpuIp='" + cpuIp + '\'' +
+                ", vmIp='" + vmIp + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", gpustatus='" + gpustatus + '\'' +
+                ", gpuip='" + gpuip + '\'' +
+                ", gpuvmip='" + gpuvmip + '\'' +
                 '}';
     }
 }

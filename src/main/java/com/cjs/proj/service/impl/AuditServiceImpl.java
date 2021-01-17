@@ -1,14 +1,16 @@
 package com.cjs.proj.service.impl;
 
+import com.cjs.proj.config.DelayQueueManager;
 import com.cjs.proj.entity.PageResult;
+import com.cjs.proj.entity.TaskBase;
+import com.cjs.proj.interf.impl.DelayTask;
 import com.cjs.proj.mapper.AuditMapper;
 import com.cjs.proj.mapper.EmployeeMapper;
-import com.cjs.proj.pojo.Audit;
-import com.cjs.proj.pojo.AuditDepartment;
-import com.cjs.proj.pojo.Employee;
-import com.cjs.proj.pojo.EmployeeDepartment;
+import com.cjs.proj.pojo.*;
 import com.cjs.proj.service.AuditService;
 import com.cjs.proj.service.EmployeeService;
+import com.cjs.proj.service.GpuvmService;
+import com.cjs.proj.service.XenServerService;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +51,15 @@ public class AuditServiceImpl implements AuditService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private GpuvmService gpuvmService;
+
+    @Autowired
+    private XenServerService xenServerService;
+
+    @Autowired
+    private DelayQueueManager delayQueueManager;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -105,7 +116,9 @@ public class AuditServiceImpl implements AuditService {
         // over
         auditMapper.insert(audit);
 
-
+        // 2. 更改自己的gpu审核状态
+        employee.setGpustatus("待审核");
+        employeeMapper.updateByPrimaryKeySelective(employee);
     }
 
     @Override
@@ -123,10 +136,66 @@ public class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public void agree(Integer id) {
+    public void agree(Integer id) throws RuntimeException {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Employee employee = employeeService.findByEmail(email);
+
         Audit audit = auditMapper.selectByPrimaryKey(id);
-        audit.setState("已审核");
-        auditMapper.updateByPrimaryKeySelective(audit);
+        // 先找有没有空闲的机器
+        // 从数据库里读取所有机器编号，查看是否有空闲的
+        List<Gpuvm> gpuVms = gpuvmService.findIsUsing();
+        if(gpuVms == null || gpuVms.size() == 0) {
+            // 没有空闲的
+            // 抛出异常
+            throw new RuntimeException("没有空闲的机器");
+        }
+        boolean flag = false;
+        int num = gpuVms.size();
+        int i = 0;
+        // 有空闲的，
+        for(Gpuvm gpuvm: gpuVms) {
+            if(!flag) {
+                // 1. 获得第一台的服务器ip
+                // 2. 获得第一台的uuid
+                // 3. 获得host的uuid
+                i++;
+                String gpuIp = gpuvm.getGpuIp();
+                String uuid = gpuvm.getUuid();
+                String gpu_uuid = gpuvm.getGpuUuid();
+                String gpuvm_ip = gpuvm.getVmIp();
+                // 3. 开机
+                try {
+                    // 成功开机（方法里包含了配置的修改）
+                    xenServerService.gpuStartup(gpuIp, gpu_uuid, uuid, audit);
+                    // 状态为至1(使用中)
+                    gpuvm.setIsUsing(1);
+                    gpuvmService.updateByPrimaryKey(gpuvm);
+                    // flag至true
+                    flag = true;
+                    // 同时添加一个延时任务， 延时关机
+                    long delayTime = 90000l;   // 1.5 min
+                    // 开任务时，传个email过去，这样就可以到时候修改gpu申请状态字段
+                    delayQueueManager.put(new DelayTask(new TaskBase(gpuIp, uuid, xenServerService, email), delayTime));
+                    // 同时将gpu使用状态为置为 使用中
+                    employee.setGpustatus("使用中");
+                    employee.setGpuip(gpuIp);
+                    employee.setGpuvmip(gpuvm_ip);
+                    employeeMapper.updateByPrimaryKey(employee);
+                    i = -1;
+                } catch (Exception e) {
+                    System.out.println("内存不足");
+                }
+            } else {
+                break;
+            }
+        }
+        if(i != -1) {
+            throw new RuntimeException("服务器所剩内存不足");
+        } else{
+            audit.setState("已审核");
+            auditMapper.updateByPrimaryKeySelective(audit);
+        }
+
     }
 
     @Override

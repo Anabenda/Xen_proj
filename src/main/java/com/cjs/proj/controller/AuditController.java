@@ -72,8 +72,13 @@ public class AuditController {
     }
 
     @GetMapping("/agree")
-    public void agree(Integer id){
-        auditService.agree(id);
+    public Result agree(Integer id){
+        try {
+            auditService.agree(id);
+            return new Result(0, "审核成功");
+        } catch (RuntimeException e) {
+            return new Result(1, e.getMessage());
+        }
     }
 
     @GetMapping("/refuse")
